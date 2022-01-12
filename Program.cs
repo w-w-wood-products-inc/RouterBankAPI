@@ -1,19 +1,14 @@
-using FirstAPI.Services;
-using FirstAPI.Services.Interfaces;
+using System.Net;
+using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Hosting;
 
-var builder = WebApplication.CreateBuilder(args);
+namespace FirstAPI {
+    public class Program {
+        public static void Main(string[] args) {
+            CreateWebHostBuilder(args).Build().Run();
+        }
 
-// Add services to the container.
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSingleton<IUserAccountManager, UserAccountManager>();
-
-var app = builder.Build();
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-app.MapControllers();
-
-app.Run();
+        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+            WebHost.CreateDefaultBuilder(args).UseStartup<Startup>();
+    }
+}

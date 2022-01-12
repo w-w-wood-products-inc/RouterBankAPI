@@ -1,59 +1,82 @@
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using DefaultNamespace;
 using demoWebAPI.models;
 using FirstAPI.Services.Interfaces;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Cryptography;
+using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 
 namespace FirstAPI.Services; 
 
 public class UserAccountManager : IUserAccountManager {
+    private Repository _repository;
+    private IConfiguration _config;
 
-    private List<UserAccount> _userAccounts { get; }
-
-    public UserAccountManager() {
-        _userAccounts = new List<UserAccount>();
-    }
-
-    public List<UserAccount> GetUsers() {
-        return _userAccounts;
+    public UserAccountManager(IConfiguration config) {
+        _repository = new Repository(config);
+        _config = config;
     }
     
-    public UserAccount? FindUserById(int userId) {
-        return _userAccounts.Find(userAccount => userAccount.userId == userId);
+    // Authenticates the user login and returns a JWT token to the user containing
+    // the bankAccount accountids they own in the claims section
+    public async Task<string?> Login(string username, string password) {
+        UserAccount? result = await _repository.GetUserAccountByLogin(username, password);
+
+        // Only continues if the user entered correct login credentials
+        if (result != null) {
+            Token token = new Token(_config);
+            return await token.GenerateToken(result.Snn);
+        }
+
+        return null;
     }
 
-    public bool AddUser(UserAccount user) {
-        if (FindUserById(user.userId) == null) {
-            _userAccounts.Add(user);
-            return true;
-        }
-        else {
-            return false;
-        }
+    public async Task<UserAccount?> GetUserAccount(string snn) {
+        return await _repository.GetUserAccountBySnn(snn);
+    }
+    
+    public async Task<UserAccount?> GetUserAccount(int accountid) {
+        return await _repository.GetUserAccountByAccountid(accountid);
     }
 
-    public bool DeleteUser(int userId) {
-        int index = _userAccounts.FindIndex(userAccount => userAccount.userId == userId);
-        
-        if (index == -1) {
-            return false;
+    public async Task<string> CreateUserAccount(UserAccount userAccount) {
+        if (
+            userAccount.Name != null && userAccount.Name.Length <= 128 &&
+            userAccount.Username != null && userAccount.Username.Length <= 128 && 
+            userAccount.Pass != null && userAccount.Pass.Length == 64 && 
+            (userAccount.Addr == null || userAccount.Addr.Length <= 128) &&
+            (userAccount.Phone == null || userAccount.Phone.Length == 10 && userAccount.Phone.All(char.IsDigit)) &&
+            (userAccount.Snn != null && userAccount.Snn.Length == 9 && userAccount.Snn.All(char.IsDigit))
+            ) {
+            int result = await _repository.CreateUserAccount(userAccount);
+            if (result == 1) {
+                Token token = new Token(_config);
+                return await token.GenerateToken(userAccount.Snn);
+            }
         }
 
-        _userAccounts.Remove(_userAccounts[index]);
-        return true;
+        return null;
     }
 
-    public bool ModifyUser(UserAccount user) {
-        int index = _userAccounts.FindIndex(userAccount => userAccount.userId == user.userId);
-
-        if (index == -1) {
-            return false;
+    public async Task<int> UpdateUserAccount(UserAccount userAccount) {
+        if (
+            userAccount.Name != null && userAccount.Name.Length <= 128 &&
+            userAccount.Username != null && userAccount.Username.Length <= 128 && 
+            userAccount.Pass != null && userAccount.Pass.Length == 64 && 
+            (userAccount.Addr == null || userAccount.Addr.Length <= 128) &&
+            (userAccount.Phone == null || userAccount.Phone.Length == 10 && userAccount.Phone.All(char.IsDigit)) &&
+            (userAccount.Snn != null && userAccount.Snn.Length == 9 && userAccount.Snn.All(char.IsDigit))
+        ) {
+            return await _repository.UpdateUserAccount(userAccount);
         }
-        
-        // Modifies all values of the user account except userId
-        _userAccounts[index].name = user.name;
-        _userAccounts[index].username = user.username;
-        _userAccounts[index].savingsBalance = user.savingsBalance;
-        _userAccounts[index].checkingBalance = user.checkingBalance;
-        _userAccounts[index].minutePercentageRate = user.minutePercentageRate;
-        _userAccounts[index].mprEnable = user.mprEnable;
-        return true;
+
+        return 0;
+    }
+
+    public async Task<int> DeleteUserAccount(UserAccount userAccount) {
+        return await _repository.DeleteUserAccountBySnn(userAccount.Snn);
     }
 }
