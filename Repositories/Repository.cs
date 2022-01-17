@@ -22,7 +22,9 @@ public class Repository : IRepository {
     // Get Queries -----------------------
     public async Task<UserAccount?> GetUserAccountBySnn(string snn) {
         await using var connection = new SqlConnection(_connectionString);
+        
         connection.Open();
+        
         try {
             IEnumerable<UserAccount?> result = await connection.QueryAsync<UserAccount>(
                 @"
@@ -51,6 +53,7 @@ public class Repository : IRepository {
     public async Task<UserAccount?> GetUserAccountByLogin(string user, string pass) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
+        
         try {
             IEnumerable<UserAccount?> result =
                 await connection.QueryAsync<UserAccount>(
@@ -73,8 +76,7 @@ public class Repository : IRepository {
                     }
                 );
             return result.ToList()[0];
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             Console.WriteLine(e);
             return null;
         }
@@ -84,6 +86,7 @@ public class Repository : IRepository {
     public async Task<UserAccount?> GetUserAccountByAccountid(int accountid) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
+        
         try {
             IEnumerable<UserAccount?> result = await connection.QueryAsync<UserAccount>(
                 @"
@@ -107,8 +110,7 @@ public class Repository : IRepository {
             );
             
             return result.ToList()[0];
-        }
-        catch {
+        } catch {
             return null;
         }
         
@@ -117,6 +119,7 @@ public class Repository : IRepository {
     public async Task<List<UserAccount?>> GetAllUserAccounts() {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
+        
         try {
             IEnumerable<UserAccount?> result = await connection.QueryAsync<UserAccount>(
                 @"
@@ -133,8 +136,7 @@ public class Repository : IRepository {
             );
             
             return result.ToList();
-        }
-        catch {
+        } catch {
             return null;
         }
         
@@ -143,6 +145,7 @@ public class Repository : IRepository {
     public async Task<BankAccount?> GetBankAccountByAccountid(int accountid) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
+        
         try {
             IEnumerable<BankAccount?> result = await connection.QueryAsync<BankAccount>(
                 @"
@@ -158,8 +161,7 @@ public class Repository : IRepository {
                 }
             );
             return result.ToList()[0];
-        }
-        catch {
+        } catch {
             return null;
         }
         
@@ -168,6 +170,7 @@ public class Repository : IRepository {
     public async Task<List<BankAccount?>> GetBankAccountsBySnn(string snn) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
+        
         try {
             IEnumerable<BankAccount?> result = await connection.QueryAsync<BankAccount>(
                 @"
@@ -185,8 +188,7 @@ public class Repository : IRepository {
                 }
             );
             return result.ToList();
-        }
-        catch {
+        } catch {
             return null;
         }
         
@@ -195,14 +197,14 @@ public class Repository : IRepository {
     public async Task<List<BankAccount?>> GetAllBankAccounts() {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
+        
         try {
             IEnumerable<BankAccount?> result = await connection.QueryAsync<BankAccount>(
                 "SELECT * FROM BANKACCOUNT"
             );
             
             return result.ToList();
-        }
-        catch {
+        } catch {
             return null;
         }
         
@@ -211,6 +213,7 @@ public class Repository : IRepository {
     public async Task<List<Transact?>> GetTransactionHistoryByAccountid(int accountid) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
+        
         try {
             IEnumerable<dynamic> result = await connection.QueryAsync(
                 @"
@@ -247,8 +250,7 @@ public class Repository : IRepository {
             }
 
             return transactions;
-        }
-        catch {
+        } catch {
             return null;
         }
         
@@ -258,6 +260,7 @@ public class Repository : IRepository {
     public async Task<int> CreateUserAccount(UserAccount userAccount) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
+        
         try {
             await connection.ExecuteAsync(
                 @"
@@ -275,8 +278,7 @@ public class Repository : IRepository {
             );
             
             return 1;
-        }
-        catch {
+        } catch {
             return 0;
         }
         
@@ -285,6 +287,7 @@ public class Repository : IRepository {
     public async Task<int> CreateBankAccount(BankAccount bankAccount) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
+        
         try {
             await connection.ExecuteAsync(
                 @"
@@ -301,8 +304,7 @@ public class Repository : IRepository {
             );
             
             return 1;
-        }
-        catch {
+        } catch {
             return 0;
         }
     }
@@ -310,6 +312,7 @@ public class Repository : IRepository {
     public async Task<int> CreateTransaction(Transact transact) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
+        
         try {
             await connection.ExecuteAsync(
                 @"
@@ -326,8 +329,7 @@ public class Repository : IRepository {
             );
             
             return 1;
-        }
-        catch {
+        } catch {
             return 0;
         }
     }
@@ -336,6 +338,7 @@ public class Repository : IRepository {
     public async Task<int> UpdateUserAccount(UserAccount userAccount) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
+        
         try {
             await connection.ExecuteAsync(
                 @"
@@ -355,8 +358,7 @@ public class Repository : IRepository {
             );
             
             return 1;
-        }
-        catch {
+        } catch {
             return 0;
         }
     }
@@ -364,6 +366,7 @@ public class Repository : IRepository {
     public async Task<int> UpdateBankAccountCheckBal(double checkBal, int accountid) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
+        
         try {
             await connection.ExecuteAsync(
                 @"
@@ -381,8 +384,7 @@ public class Repository : IRepository {
             );
             
             return 1;
-        }
-        catch {
+        } catch {
             return 0;
         }
     }
@@ -390,6 +392,7 @@ public class Repository : IRepository {
     public async Task<int> UpdateBankAccountSaveBal(double saveBal, int accountid) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
+        
         try {
             await connection.ExecuteAsync(
                 @"
@@ -407,8 +410,7 @@ public class Repository : IRepository {
             );
             
             return 1;
-        }
-        catch {
+        } catch {
             return 0;
         }
     }
@@ -416,6 +418,7 @@ public class Repository : IRepository {
     public async Task<int> UpdateBankAccountMpr(double mpr, int accountid) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
+        
         try {
             await connection.ExecuteAsync(
                 @"
@@ -433,8 +436,7 @@ public class Repository : IRepository {
             );
             
             return 1;
-        }
-        catch {
+        } catch {
             return 0;
         }
     }
@@ -442,6 +444,7 @@ public class Repository : IRepository {
     public async Task<int> UpdateBankAccountMprEnable(bool mprEnable, int accountid) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
+        
         try {
             await connection.ExecuteAsync(
                 @"
@@ -459,8 +462,7 @@ public class Repository : IRepository {
             );
             
             return 1;
-        }
-        catch {
+        } catch {
             return 0;
         }
     }
@@ -469,6 +471,7 @@ public class Repository : IRepository {
     public async Task<int> DeleteUserAccountBySnn(string snn) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
+        
         try {
             await connection.ExecuteAsync(
                 @"
@@ -483,8 +486,7 @@ public class Repository : IRepository {
             );
             
             return 1;
-        }
-        catch {
+        } catch {
             return 0;
         }
     }
@@ -492,6 +494,7 @@ public class Repository : IRepository {
     public async Task<int> DeleteBankAccountByAccountid(int accountid) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
+        
         try {
             await connection.ExecuteAsync(
                 @"
@@ -506,8 +509,7 @@ public class Repository : IRepository {
             );
             
             return 1;
-        }
-        catch {
+        } catch {
             return 0;
         }
     }
