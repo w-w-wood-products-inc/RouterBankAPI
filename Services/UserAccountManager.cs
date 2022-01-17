@@ -12,12 +12,12 @@ using Microsoft.AspNetCore.Cryptography.KeyDerivation;
 namespace FirstAPI.Services; 
 
 public class UserAccountManager : IUserAccountManager {
-    private Repository _repository;
+    private Repository    _repository;
     private IConfiguration _config;
 
     public UserAccountManager(IConfiguration config) {
         _repository = new Repository(config);
-        _config = config;
+        _config      = config;
     }
     
     // Authenticates the user login and returns a JWT token to the user containing
@@ -28,6 +28,7 @@ public class UserAccountManager : IUserAccountManager {
         // Only continues if the user entered correct login credentials
         if (result != null) {
             Token token = new Token(_config);
+            
             return await token.GenerateToken(result.Snn);
         }
 
@@ -44,13 +45,13 @@ public class UserAccountManager : IUserAccountManager {
 
     public async Task<string> CreateUserAccount(UserAccount userAccount) {
         if (
-            userAccount.Name != null && userAccount.Name.Length <= 128 &&
+            userAccount.Name     != null && userAccount.Name.Length     <= 128 &&
             userAccount.Username != null && userAccount.Username.Length <= 128 && 
-            userAccount.Pass != null && userAccount.Pass.Length == 64 && 
-            (userAccount.Addr == null || userAccount.Addr.Length <= 128) &&
-            (userAccount.Phone == null || userAccount.Phone.Length == 10 && userAccount.Phone.All(char.IsDigit)) &&
-            (userAccount.Snn != null && userAccount.Snn.Length == 9 && userAccount.Snn.All(char.IsDigit))
-            ) {
+            userAccount.Pass     != null && userAccount.Pass.Length     == 64  && 
+            userAccount.Addr     == null || userAccount.Addr.Length     <= 128 &&
+            userAccount.Phone    == null || userAccount.Phone.Length    == 10  && userAccount.Phone.All(char.IsDigit) &&
+            userAccount.Snn      != null && userAccount.Snn.Length      == 9   && userAccount.Snn.All(char.IsDigit)
+        ) {
             int result = await _repository.CreateUserAccount(userAccount);
             if (result == 1) {
                 Token token = new Token(_config);
@@ -63,12 +64,12 @@ public class UserAccountManager : IUserAccountManager {
 
     public async Task<int> UpdateUserAccount(UserAccount userAccount) {
         if (
-            userAccount.Name != null && userAccount.Name.Length <= 128 &&
+            userAccount.Name     != null && userAccount.Name.Length     <= 128 &&
             userAccount.Username != null && userAccount.Username.Length <= 128 && 
-            userAccount.Pass != null && userAccount.Pass.Length == 64 && 
-            (userAccount.Addr == null || userAccount.Addr.Length <= 128) &&
-            (userAccount.Phone == null || userAccount.Phone.Length == 10 && userAccount.Phone.All(char.IsDigit)) &&
-            (userAccount.Snn != null && userAccount.Snn.Length == 9 && userAccount.Snn.All(char.IsDigit))
+            userAccount.Pass     != null && userAccount.Pass.Length     == 64  && 
+            userAccount.Addr     == null || userAccount.Addr.Length     <= 128 &&
+            userAccount.Phone    == null || userAccount.Phone.Length    == 10  && userAccount.Phone.All(char.IsDigit) &&
+            userAccount.Snn      != null && userAccount.Snn.Length      == 9   && userAccount.Snn.All(char.IsDigit)
         ) {
             return await _repository.UpdateUserAccount(userAccount);
         }
