@@ -4,14 +4,14 @@ namespace FirstAPI.Repositories;
 
 public interface IRepository {
     // Get
-    public Task<UserAccount?> GetUserAccountBySnn(string snn);
-    public Task<UserAccount?> GetUserAccountByLogin(string user, string pass);
-    public Task<UserAccount?> GetUserAccountByAccountid(int accountid);
+    public Task<UserAccount?>       GetUserAccountBySnn(string snn);
+    public Task<UserAccount?>       GetUserAccountByLogin(string user, string pass);
+    public Task<UserAccount?>       GetUserAccountByAccountid(int accountid);
     public Task<List<UserAccount?>> GetAllUserAccounts();
-    public Task<BankAccount?> GetBankAccountByAccountid(int accountid);
+    public Task<BankAccount?>       GetBankAccountByAccountid(int accountid);
     public Task<List<BankAccount?>> GetBankAccountsBySnn(string snn);
     public Task<List<BankAccount?>> GetAllBankAccounts();
-    public Task<List<Transact?>> GetTransactionHistoryByAccountid(int accountid);
+    public Task<List<Transact?>>    GetTransactionHistoryByAccountid(int accountid);
     
     // Post
     public Task<int> CreateUserAccount(UserAccount userAccount);
