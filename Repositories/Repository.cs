@@ -20,6 +20,12 @@ public class Repository : IRepository {
     }
     
     // Get Queries -----------------------
+    
+    /// <summary>
+    /// Gets a users account by social security number
+    /// </summary>
+    /// <param name="snn">The users social security number</param>
+    /// <returns>Possibly a user account matching the ssn</returns>
     public async Task<UserAccount?> GetUserAccountBySnn(string snn) {
         await using var connection = new SqlConnection(_connectionString);
         
@@ -50,6 +56,13 @@ public class Repository : IRepository {
         }
         
     }
+    
+    /// <summary>
+    /// Gets a user account by username and password.
+    /// </summary>
+    /// <param name="user">The user's username</param>
+    /// <param name="pass">The user's password</param>
+    /// <returns>Possibly a user account linked to the login information</returns>
     public async Task<UserAccount?> GetUserAccountByLogin(string user, string pass) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
@@ -83,6 +96,11 @@ public class Repository : IRepository {
         
     }
 
+    /// <summary>
+    /// Get a user's account by its account id.
+    /// </summary>
+    /// <param name="accountid">The id of the account to get</param>
+    /// <returns>Possibly a UserAccount associated with the id</returns>
     public async Task<UserAccount?> GetUserAccountByAccountid(int accountid) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
@@ -116,6 +134,10 @@ public class Repository : IRepository {
         
     }
 
+    /// <summary>
+    /// Returns all of the user accounts.
+    /// </summary>
+    /// <returns>All of the user accounts</returns>
     public async Task<List<UserAccount?>> GetAllUserAccounts() {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
@@ -142,6 +164,11 @@ public class Repository : IRepository {
         
     }
     
+    /// <summary>
+    /// Gets a bank account using the account id
+    /// </summary>
+    /// <param name="accountid">The id of the bank account to get</param>
+    /// <returns>Possibly the bank account associated with the specified account id</returns>
     public async Task<BankAccount?> GetBankAccountByAccountid(int accountid) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
@@ -167,6 +194,12 @@ public class Repository : IRepository {
         
     }
 
+    /// <summary>
+    /// Gets all bank accounts associated with a particular social security
+    /// number.
+    /// </summary>
+    /// <param name="snn">The social security number of the account holder</param>
+    /// <returns>A list of bank accounts.</returns>
     public async Task<List<BankAccount?>> GetBankAccountsBySnn(string snn) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
@@ -194,6 +227,12 @@ public class Repository : IRepository {
         
     }
 
+    /// <summary>
+    /// Gets all of the bank accounts.
+    /// </summary>
+    /// <returns>
+    /// All of the bank accounts.
+    /// </returns>
     public async Task<List<BankAccount?>> GetAllBankAccounts() {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
@@ -210,6 +249,13 @@ public class Repository : IRepository {
         
     }
 
+    /// <summary>
+    /// Gets the transaction history by account id.
+    /// </summary>
+    /// <param name="accountid">
+    /// The id of the account to get the transaction history for
+    /// </param>
+    /// <returns>A list of transactions</returns>
     public async Task<List<Transact?>> GetTransactionHistoryByAccountid(int accountid) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
@@ -257,6 +303,12 @@ public class Repository : IRepository {
     }
     
     // Post Queries -----------------------
+    
+    /// <summary>
+    /// Creates a new user account
+    /// </summary>
+    /// <param name="userAccount">The user account to create</param>
+    /// <returns>1 if successful and 0 if there was an error</returns>
     public async Task<int> CreateUserAccount(UserAccount userAccount) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
@@ -284,6 +336,15 @@ public class Repository : IRepository {
         
     }
 
+    /// <summary>
+    /// Creates a new bank account.
+    /// </summary>
+    /// <param name="bankAccount">
+    /// The details used to create the new bank account.
+    /// </param>
+    /// <returns>
+    /// 1 if success, 0 otherwise
+    /// </returns>
     public async Task<int> CreateBankAccount(BankAccount bankAccount) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
@@ -309,6 +370,14 @@ public class Repository : IRepository {
         }
     }
 
+    /// <summary>
+    /// Creates a new transaction
+    /// </summary>
+    /// <param name="transact">
+    /// The transaction details used to create the new Transaction instance.</param>
+    /// <returns>
+    /// 1 if successful, 0 if failure
+    /// </returns>
     public async Task<int> CreateTransaction(Transact transact) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
@@ -335,6 +404,14 @@ public class Repository : IRepository {
     }
     
     // Put Queries -----------------------
+    
+    /// <summary>
+    /// Updates a user account with new information.
+    /// </summary>
+    /// <param name="userAccount">
+    /// The useraccount
+    /// </param>
+    /// <returns>1 if successful, 0 if failure.</returns>
     public async Task<int> UpdateUserAccount(UserAccount userAccount) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
@@ -363,6 +440,12 @@ public class Repository : IRepository {
         }
     }
 
+    /// <summary>
+    /// Updates a bank account's balance
+    /// </summary>
+    /// <param name="checkBal">The correct balance</param>
+    /// <param name="accountid">The id of the account to update</param>
+    /// <returns>1 if successful and 0 if a failure</returns>
     public async Task<int> UpdateBankAccountCheckBal(double checkBal, int accountid) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
@@ -389,6 +472,12 @@ public class Repository : IRepository {
         }
     }
 
+    /// <summary>
+    /// Updates the balanace of a savings account.
+    /// </summary>
+    /// <param name="saveBal">The correct balance</param>
+    /// <param name="accountid">The id of the account to update</param>
+    /// <returns>1 if success, 0 if failure</returns>
     public async Task<int> UpdateBankAccountSaveBal(double saveBal, int accountid) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
@@ -415,6 +504,12 @@ public class Repository : IRepository {
         }
     }
 
+    /// <summary>
+    /// Updates the Mpr for the bank account.
+    /// </summary>
+    /// <param name="mpr">The Mpr</param>
+    /// <param name="accountid">The id of the account to lookup</param>
+    /// <returns>1 if success, 0 if failure</returns>
     public async Task<int> UpdateBankAccountMpr(double mpr, int accountid) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
@@ -441,6 +536,12 @@ public class Repository : IRepository {
         }
     }
 
+    /// <summary>
+    /// ?
+    /// </summary>
+    /// <param name="mprEnable">Whether or not to enable Mpr</param>
+    /// <param name="accountid">The id of the account to update</param>
+    /// <returns></returns>
     public async Task<int> UpdateBankAccountMprEnable(bool mprEnable, int accountid) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
@@ -468,6 +569,12 @@ public class Repository : IRepository {
     }
     
     // Delete Queries -----------------------
+    
+    /// <summary>
+    /// Deletes a user account by social security number
+    /// </summary>
+    /// <param name="snn">The ssn of the account to delete</param>
+    /// <returns>1 on success and 0 on failure</returns>
     public async Task<int> DeleteUserAccountBySnn(string snn) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
@@ -491,6 +598,11 @@ public class Repository : IRepository {
         }
     }
 
+    /// <summary>
+    /// Deletes a bank account by id
+    /// </summary>
+    /// <param name="accountid">The id of the bank account to delete.</param>
+    /// <returns>1 on success and 0 on failure</returns>
     public async Task<int> DeleteBankAccountByAccountid(int accountid) {
         await using var connection = new SqlConnection(_connectionString);
         connection.Open();
