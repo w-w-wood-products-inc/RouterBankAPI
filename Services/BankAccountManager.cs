@@ -10,23 +10,27 @@ using Microsoft.IdentityModel.Tokens;
 namespace FirstAPI.Services; 
 
 public class BankAccountManager: IBankAccountManager {
-    private Repository _repository;
+    private Repository    _repository;
     private IConfiguration _config;
 
     public BankAccountManager(IConfiguration config) {
         _repository = new Repository(config);
-        _config = config;
+        _config      = config;
     }
     
     // Authenticates user access to a specific bank account by comparing the claims of the JWT token
     // to the bank account the user wishes to access
     public bool AuthenticateBankAccount(ClaimsPrincipal claims, int accountIdToCheck) {
              if (claims.HasClaim(c => c.Type == "BankAccountsOwned")) {
-                 string parsedClaims = claims.Claims.FirstOrDefault(c => c.Type == "BankAccountsOwned").Value;
+                 string parsedClaims = claims.Claims.FirstOrDefault(
+                     c => c.Type == "BankAccountsOwned"
+                 ).Value;
+                 
                  string[] bankAccountsOwnedString = parsedClaims.Split(" ");
                  
                  // Parses all claims from the JWT token into an integer list for easy comparing
                  List<int> bankAccountsOwned = new();
+                 
                  foreach (string bankAccountString in bankAccountsOwnedString) {
                      if (int.TryParse(bankAccountString, out int returnedValue)) {
                          bankAccountsOwned.Add(returnedValue);
@@ -45,11 +49,15 @@ public class BankAccountManager: IBankAccountManager {
     // Returns all bank account ids that a user has access to based on their JWT claims section
     public List<int>? GetBankAccountIds(ClaimsPrincipal claims) {
         if (claims.HasClaim(c => c.Type == "BankAccountsOwned")) {
-            string parsedClaims = claims.Claims.FirstOrDefault(c => c.Type == "BankAccountsOwned").Value;
+            string parsedClaims = claims.Claims.FirstOrDefault(
+                c => c.Type == "BankAccountsOwned"
+            ).Value;
+            
             string[] bankAccountsOwnedString = parsedClaims.Split(" ");
             
             // Parses all claims from the JWT token into an integer list for easy comparing
             List<int> bankAccountsOwned = new();
+            
             foreach (string bankAccountString in bankAccountsOwnedString) {
                 if (int.TryParse(bankAccountString, out int returnedValue)) {
                     bankAccountsOwned.Add(returnedValue);
@@ -72,21 +80,25 @@ public class BankAccountManager: IBankAccountManager {
 
     public async Task<string> CreateBankAccount(BankAccount bankAccount) {
         // Sets any null values that have a default value to that value
-        if (bankAccount.Checkbal == null) bankAccount.Checkbal = 0;
-        if (bankAccount.Savebal == null) bankAccount.Savebal = 0;
-        if (bankAccount.Mpr == null) bankAccount.Mpr = 0.05;
+        if (bankAccount.Checkbal   == null) bankAccount.Checkbal   = 0;
+        if (bankAccount.Savebal    == null) bankAccount.Savebal    = 0;
+        if (bankAccount.Mpr        == null) bankAccount.Mpr        = 0.05;
         if (bankAccount.Mpr_enable == null) bankAccount.Mpr_enable = false;
         
         // Checks to ensure the bankAccount variables meets the database constraints
         if (
-            bankAccount.Ussn != null && bankAccount.Ussn.Length == 9 && bankAccount.Ussn.All(char.IsDigit) &&
-            bankAccount.Checkbal >= 0 &&
-            bankAccount.Savebal > -0 &&
-            bankAccount.Mpr >= 0 && bankAccount.Mpr <= 3
+            bankAccount.Ussn        != null && 
+            bankAccount.Ussn.Length == 9    && 
+            bankAccount.Checkbal    >= 0    &&
+            bankAccount.Savebal     > -0    &&
+            bankAccount.Mpr         >= 0    && 
+            bankAccount.Mpr         <= 3    &&
+            bankAccount.Ussn.All(char.IsDigit) 
         ) {
             // Finds the next available accountid that is not occupied yet
             List<BankAccount> allBankAccounts = await _repository.GetAllBankAccounts();
             int count = 1;
+            
             while (true) {
                 if (allBankAccounts.FirstOrDefault(k => k.Accountid == count) == null) {
                     bankAccount.Accountid = count;
@@ -97,6 +109,7 @@ public class BankAccountManager: IBankAccountManager {
 
             // Attempts to insert a new bank account into the database and returns a new token if successful
             int result = await _repository.CreateBankAccount(bankAccount);
+            
             if (result == 1) {
                 Token token = new Token(_config);
                 return await token.GenerateToken(bankAccount.Ussn);
@@ -108,12 +121,23 @@ public class BankAccountManager: IBankAccountManager {
     
     public async Task<int> DepositSavings(double amount, int accountid) {
         BankAccount? bankAccount = await _repository.GetBankAccountByAccountid(accountid);
+        
         if (bankAccount != null && amount > 0) {
             bankAccount.Savebal += amount;
             if (
                 await _repository.UpdateBankAccountSaveBal(bankAccount.Savebal, accountid) == 1 &&
-                await _repository.CreateTransaction(new Transact(accountid, "deposit", amount, "savings",
-                    bankAccount.Savebal, DateTime.Now.ToString(CultureInfo.GetCultureInfo("en-US")))) == 1
+                await _repository.CreateTransaction(
+                    new Transact(
+                        accountid, 
+                        "deposit", 
+                        amount, 
+                        "savings",
+                        bankAccount.Savebal, 
+                        DateTime.Now.ToString(
+                            CultureInfo.GetCultureInfo("en-US")
+                        )
+                    )
+                ) == 1
             ) {
                 return 1;
             }
@@ -124,12 +148,27 @@ public class BankAccountManager: IBankAccountManager {
 
     public async Task<int> WithdrawSavings(double amount, int accountid) {
         BankAccount? bankAccount = await _repository.GetBankAccountByAccountid(accountid);
-        if (bankAccount != null && amount > 0 && bankAccount.Savebal >= amount) {
+        
+        if (
+            bankAccount         != null && 
+            amount              >  0    && 
+            bankAccount.Savebal >= amount
+        ) {
             bankAccount.Savebal -= amount;
             if (
                 await _repository.UpdateBankAccountSaveBal(bankAccount.Savebal, accountid) == 1 &&
-                await _repository.CreateTransaction(new Transact(accountid, "withdraw", amount, "savings",
-                    bankAccount.Savebal, DateTime.Now.ToString(CultureInfo.GetCultureInfo("en-US")))) == 1
+                await _repository.CreateTransaction(
+                    new Transact(
+                        accountid, 
+                        "withdraw", 
+                        amount, 
+                        "savings",
+                        bankAccount.Savebal, 
+                        DateTime.Now.ToString(
+                            CultureInfo.GetCultureInfo("en-US")
+                        )
+                    )
+                ) == 1
             ) {
                 return 1;
             }
@@ -140,12 +179,23 @@ public class BankAccountManager: IBankAccountManager {
 
     public async Task<int> DepositChecking(double amount, int accountid) {
         BankAccount? bankAccount = await _repository.GetBankAccountByAccountid(accountid);
+        
         if (bankAccount != null && amount > 0) {
             bankAccount.Checkbal += amount;
             if (
                 await _repository.UpdateBankAccountCheckBal(bankAccount.Checkbal, accountid) == 1 &&
-                await _repository.CreateTransaction(new Transact(accountid, "deposit", amount, "checking",
-                    bankAccount.Checkbal, DateTime.Now.ToString(CultureInfo.GetCultureInfo("en-US")))) == 1
+                await _repository.CreateTransaction(
+                    new Transact(
+                        accountid, 
+                        "deposit", 
+                        amount, 
+                        "checking",
+                        bankAccount.Checkbal, 
+                        DateTime.Now.ToString(
+                            CultureInfo.GetCultureInfo("en-US")
+                        )
+                    )
+                ) == 1
             ) {
                 return 1;
             }
@@ -156,12 +206,28 @@ public class BankAccountManager: IBankAccountManager {
 
     public async Task<int> WithdrawChecking(double amount, int accountid) {
         BankAccount? bankAccount = await _repository.GetBankAccountByAccountid(accountid);
-        if (bankAccount != null && amount > 0 && bankAccount.Checkbal >= amount) {
+        
+        if (
+            bankAccount          != null && 
+            amount               > 0     && 
+            bankAccount.Checkbal >= amount
+        ) {
             bankAccount.Checkbal -= amount;
+            
             if (
                 await _repository.UpdateBankAccountCheckBal(bankAccount.Checkbal, accountid) == 1 &&
-                await _repository.CreateTransaction(new Transact(accountid, "withdraw", amount, "checking",
-                    bankAccount.Checkbal, DateTime.Now.ToString(CultureInfo.GetCultureInfo("en-US")))) == 1
+                await _repository.CreateTransaction(
+                    new Transact(
+                        accountid, 
+                        "withdraw", 
+                        amount, 
+                        "checking",
+                        bankAccount.Checkbal, 
+                        DateTime.Now.ToString(
+                            CultureInfo.GetCultureInfo("en-US")
+                        )
+                    )
+                ) == 1
             ) {
                 return 1;
             }
@@ -190,11 +256,36 @@ public class BankAccountManager: IBankAccountManager {
             if (transferTo == "checking" && bankAccount.Savebal >= amount) {
                 if (
                     await _repository.UpdateBankAccountSaveBal(bankAccount.Savebal - amount, accountid) == 1 &&
-                    await _repository.CreateTransaction(new Transact(accountid, "withdraw", amount, "savings",
-                        bankAccount.Savebal - amount, DateTime.Now.ToString(CultureInfo.GetCultureInfo("en-US")))) == 1 &&
-                    await _repository.UpdateBankAccountCheckBal(bankAccount.Checkbal + amount, accountid) == 1 &&
-                    await _repository.CreateTransaction(new Transact(accountid, "deposit", amount, "checking",
-                        bankAccount.Checkbal + amount, DateTime.Now.ToString(CultureInfo.GetCultureInfo("en-US")))) == 1
+                    await _repository.CreateTransaction(
+                        new Transact(
+                            accountid, 
+                            "withdraw", 
+                            amount, 
+                            "savings",
+                            bankAccount.Savebal - amount, 
+                            DateTime.Now.ToString(
+                                CultureInfo.GetCultureInfo("en-US")
+                            )
+                        )
+                    ) == 1 &&
+                    await _repository.UpdateBankAccountCheckBal(
+                        bankAccount.Checkbal + amount, 
+                        accountid
+                    ) == 1 &&
+                    await _repository.CreateTransaction(
+                        new Transact(
+                            accountid, 
+                            "deposit", 
+                            amount, 
+                            "checking",
+                            bankAccount.Checkbal + amount, 
+                            DateTime.Now.ToString(
+                                CultureInfo.GetCultureInfo(
+                                    "en-US"
+                                )
+                            )
+                        )
+                    ) == 1
                 ) {
                     return 1;
                 }
@@ -203,12 +294,42 @@ public class BankAccountManager: IBankAccountManager {
             // Attempts to transfer money from checking to savings
             if (transferTo == "savings" && bankAccount.Checkbal >= amount) {
                 if (
-                    await _repository.UpdateBankAccountCheckBal(bankAccount.Checkbal - amount, accountid) == 1 &&
-                    await _repository.CreateTransaction(new Transact(accountid, "withdraw", amount, "checking",
-                        bankAccount.Checkbal - amount, DateTime.Now.ToString(CultureInfo.GetCultureInfo("en-US")))) == 1 &&
-                    await _repository.UpdateBankAccountSaveBal(bankAccount.Savebal + amount, accountid) == 1 &&
-                    await _repository.CreateTransaction(new Transact(accountid, "deposit", amount, "savings",
-                        bankAccount.Savebal + amount, DateTime.Now.ToString(CultureInfo.GetCultureInfo("en-US")))) == 1
+                    await _repository.UpdateBankAccountCheckBal(
+                        bankAccount.Checkbal - amount, 
+                        accountid
+                    ) == 1 &&
+                    await _repository.CreateTransaction(
+                        new Transact(
+                            accountid, 
+                            "withdraw", 
+                            amount, 
+                            "checking",
+                            bankAccount.Checkbal - amount, 
+                            DateTime.Now.ToString(
+                                CultureInfo.GetCultureInfo(
+                                    "en-US"
+                                )
+                            )
+                        )
+                    ) == 1 &&
+                    await _repository.UpdateBankAccountSaveBal(
+                        bankAccount.Savebal + amount, 
+                        accountid
+                    ) == 1 &&
+                    await _repository.CreateTransaction(
+                        new Transact(
+                            accountid, 
+                            "deposit", 
+                            amount, 
+                            "savings",
+                            bankAccount.Savebal + amount, 
+                            DateTime.Now.ToString(
+                                CultureInfo.GetCultureInfo(
+                                    "en-US"
+                                )
+                            )
+                        )
+                    ) == 1
                 ) {
                     return 1;
                 }
