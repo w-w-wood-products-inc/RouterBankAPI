@@ -20,8 +20,16 @@ public class UserAccountManager : IUserAccountManager {
         _config      = config;
     }
     
-    // Authenticates the user login and returns a JWT token to the user containing
-    // the bankAccount accountids they own in the claims section
+    // 
+    // 
+    
+    /// <summary>
+    /// Authenticates the user login and returns a JWT token to the user containing
+    /// the bankAccount accountids they own in the claims section
+    /// </summary>
+    /// <param name="username">The username</param>
+    /// <param name="password">The password</param>
+    /// <returns>A JWT Token</returns>
     public async Task<string?> Login(string username, string password) {
         UserAccount? result = await _repository.GetUserAccountByLogin(username, password);
 
